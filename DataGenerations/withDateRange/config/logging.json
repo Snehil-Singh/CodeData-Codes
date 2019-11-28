@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+  		"json": {
+  		"format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+  		"datefmt": "%m/%d/%Y %I:%M:%S %p %Z",
+  			"()": "pythonjsonlogger.jsonlogger.JsonFormatter"
+     	}
+  },
+  "handlers": {
+   
+    	"file_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "DEBUG",
+            "formatter": "json",
+            "filename": "..\\withDateRange\\log\\DataGeneration.log",
+            "maxBytes": 6144,
+            "backupCount": 10,
+            "encoding": "utf8"
+ 		 }
+  },
+    
+  "root": {
+       "level": "INFO",
+       "handlers": ["file_handler"]
+  }
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+  
+<title> upload </title>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+ <link href="https://bootswatch.com/4/slate/bootstrap.min.css"
+ rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+<div class="container">
+  <div class="jumbotron">
+  <div class = "mx-auto" style="width:400px;">
+    <h1>ETL Tool For ML Data</h1>      
+    <p>This page will Validate the Source Files and Target Files</p>
+  </div>     
+</div>
+
+<form id = "upload-form" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+	
+	<h5><strong>Source:</strong>
+	<input type="radio"  name="Source" onclick="box(0)" value="File"  checked> File 
+	<input type="radio" name="Source" onclick="box(1)" value="Database" > Database <br>
+	<div id="file-selector">
+		<strong>Input File: </strong>
+		<input id="source_fileName" type="file" name="source_fileName" accept="csv/*" multiple  ><br>
+	</div>
+	</h5>
+	<br></br>
+	<h5><strong>Target:</strong>
+	<input type="radio" name="Target" onclick="text(0)" value="File" checked> File 
+	<input type="radio" name="Target" onclick="text(1)" value="Database" > Database <br>
+	<div id="text-selector">
+		<strong> File Name: </strong>
+		<input type="text" name="target_fileName" id="target_fileName"><br>
+	</div>
+	</h5>
+	
+    <div id="msg"></div>
+    
+	<input type="submit" value="Submit" id="upload-button"  >
+	
+</form>
+</div>
+</body>
+
+<script>
+	function box(x)
+	{
+	if (x==0)
+	document.getElementById("file-selector").style.display="block";
+	else
+	document.getElementById("file-selector").style.display="none";
+	return;
+	}
+	
+	function text(x)
+	{
+	if (x==0)
+	document.getElementById("text-selector").style.display="block";
+	else
+	document.getElementById("text-selector").style.display="none";
+	return;
+	}
+	
+</script>
+
+<script>
+//$- is a jquery selector 
+	$("#source_fileName").change (function(){ //in this line wha	tever change to file-picker its trigger the selector and implementation will work.
+    debugger;
+    
+        var input = document.getElementById('source_fileName');
+        for (var i=0; i<input.files.length; i++)
+        {
+        //koala.csv, koala.CSV substring(index) lastIndexOf('a') koala.1.csv
+            var ext= input.files[i].name.substring(input.files[i].name.lastIndexOf('.')+1).toLowerCase()
+            if (ext == 'csv') {
+            	//var fileSize = input.files[i].size;
+            	//console.log("File Size - " + fileSize);
+                $("#upload-button").prop("disabled", false);
+                $("#msg").text("");
+                //$("#msg").text(" File Is Supported ").css("color","green").css("font-size","23px");
+            }
+            else
+            {
+                $("#msg").text("File Does Not Support").css("color", "red").css("font-size","23px");
+                document.getElementById("source_fileName").value ="";
+                $("#upload-button").prop("disabled", true);
+            }
+        }
+    } );
+</script>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title> upload </title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	<link href="https://bootswatch.com/4/slate/bootstrap.min.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<script>
+//A drop-down list
+	$( document ).ready(function() {
+		
+			for(var i=1970; i<=2018; i++){
+		   		var fromYearSelect = document.getElementById("fromYear");
+		   		var toYearSelect = document.getElementById("toYear");
+		   		
+		   		var option = document.createElement("OPTION");
+				fromYearSelect.options.add(option);
+				option.text = i;
+				option.value = i;
+				
+				
+				var option2 = document.createElement("OPTION");
+				toYearSelect.options.add(option2);
+				option2.text = i;
+				option2.value = i;
+			}
+		});
+$(function () { 
+	function moveItems(origin, dest) {
+	    $(origin).find(':selected').appendTo(dest);
+	}
+	 
+	function moveAllItems(origin, dest) {
+	    $(origin).children().appendTo(dest);
+	}
+	 
+	$('#left').click(function () {
+	    moveItems('#targetHeaderFields', '#sourceHeaderFields');
+	});
+	 
+	$('#right').on('click', function () {
+	    moveItems('#sourceHeaderFields', '#targetHeaderFields');
+	});
+	 
+	$('#leftall').on('click', function () {
+	    moveAllItems('#targetHeaderFields', '#sourceHeaderFields');
+	});
+	 
+	$('#rightall').on('click', function () {
+	    moveAllItems('#sourceHeaderFields', '#targetHeaderFields');
+	});
+	
+	$('#populateHeaderFields').on('click', function () {
+	    
+	    alert("Inside populate list");
+	
+		var files = ('#source_fileName').files;
+		alert("Files Count - "+ files);
+		
+	});
+	
+	$('#upload-form').on('change', function(evt) {
+		//alert('File content changed');
+		debugger;
+		
+		var filesCount = evt.target.files.length;
+		for (i = 0; i < filesCount; i++) {
+			var file = evt.target.files[i];   
+		    if (file) {
+		     var reader = new FileReader();
+		      /*
+		      reader.onload = function(e) { 
+		          var contents = e.target.result;             
+		          var ct = reader.result;
+		          var words = ct.split(' ');            
+		      }
+		      reader.readAsText(file);
+		      */
+		      
+		      // Read our file to an ArrayBuffer
+			    reader.readAsArrayBuffer(file);
+			
+			    // Handler for onloadend event.  Triggered each time the reading operation is completed (success or failure) 
+			    reader.onloadend = function (evt) {
+			        // Get the Array Buffer
+			        var data = evt.target.result;
+			
+			        // Grab our byte length
+			        var byteLength = data.byteLength;
+			
+			        // Convert to conventional array, so we can iterate though it
+			        var ui8a = new Uint8Array(data, 0);
+			
+			        // Used to store each character that makes up CSV header
+			        var headerString = '';
+			
+			        // Iterate through each character in our Array
+			        for (var i = 0; i < byteLength; i++) {
+			            // Get the character for the current iteration
+			            var char = String.fromCharCode(ui8a[i]);
+			
+			            // Check if the char is a new line
+			            if (char.match(/[^\r\n]+/g) !== null) {
+			                
+			                // Not a new line so lets append it to our header string and keep processing
+			                headerString += char;
+			                
+			            } else {
+			                // We found a new line character, stop processing
+			                break;
+			            }
+			        }
+			        //Iterate through the list and populate the select element..
+			        $.each(headerString.split(","), function(i,e){
+				        $("#sourceHeaderFields").append($("<option>", {
+					        text: e,
+					        value: e
+					    }));
+				    });
+			        console.log(headerString);
+			        console.log("Next Read");
+			    };
+		    } else { 
+		      alert("Failed to load file");
+		    }
+		}
+		
+	});
+});
+</script>
+
+<body>
+<div class="container">
+  	<div class="jumbotron">
+	  <div class = "mx-auto" style="width:500px;">
+	    <h1>Large Data Generation</h1>      
+	  </div>     
+	</div>
+	<form id = "upload-form" action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+		<div id="file-selector">
+			<p> 
+				<strong>Source File: </strong>
+				<input id="source_fileName" type="file" name="source_fileName" accept="csv/*" multiple style="
+	    		margin-left: 10px;"/>
+    		</p> 
+		</div>
+		<br>
+		<strong>Location Type:</strong>
+			<input type="radio" name="target" value="BrowserDownload" checked >Browse Local
+			<input type="radio" name="target" value="dumpToS3"  > S3 Remote 
+			<br></br>
+		
+			<h2>Select Features From Seed Data: </h2>
+			    <select id="sourceHeaderFields" name="sourceHeaderFields" multiple="multiple" 
+			    		style="width:210Px;height:150px;margin-left: 100px;">
+			    </select>
+			    <select id="targetHeaderFields" name="targetHeaderFields" multiple="multiple" 
+			    		style="width:210Px; height:150px">
+		    	</select>
+		    <br>
+			    <input type="button" id="leftall" value="<<" style="margin-left: 250px;"/>
+			 	<input type="button" id="left" value="<" />
+			    <input type="button" id="right" value=">" />
+			    <input type="button" id="rightall" value=">>" />
+		    
+		    <br />
+	    
+	    
+		
+		<!--  
+		<div class="container" style="max-width: 800px;">
+			
+			<div class="row" style="margin-right: 0;margin-left: 0">
+				<div class="col-md-6">
+					<h2>Select features from Seed data </h2>
+				</div>
+				<div class="col-md-6">
+					<div class="row" style="margin-right: 0;margin-left: 0">
+						<div>
+							<select id="sourceHeaderFields" name="sourceHeaderFields" multiple="multiple" 
+						    		style="width:200Px; height:150px">
+						    </select>
+						</div>
+						<div style="max-width: 50px; padding-top:10px">
+							<input type="button" id="left" value="<" style="display: block;"/>
+						    <input type="button" id="right" value=">" style="display: block;"/>
+						    <input type="button" id="leftall" value="<<" style="display: block;"/>
+						    <input type="button" id="rightall" value=">>" style="display: block;"/>
+						</div>
+						<div>
+							<select id="targetHeaderFields" name="targetHeaderFields" multiple="multiple" 
+							style="width:200Px; height:150px">
+						    </select>
+						</div>
+					</div>
+				</div>
+			</div>
+  		</div>
+  		-->
+  		
+		<!--  
+		<div style="width:500Px;">
+		<h2>Select features from Seed data </h2>
+			<div "style="float:left !important; display: inline-block !important;">
+			    <select id="sourceHeaderFields" name="sourceHeaderFields" multiple="multiple" 
+			    		style="width:200Px;">
+			    </select>
+		    </div>
+		    <div "style="display: inline-block !important; float:left !important">
+			 	<input type="button" id="left" value="<" style="display: block; !important"/>
+			    <input type="button" id="right" value=">" style="display: block;"/>
+			    <input type="button" id="leftall" value="<<" style="display: block;"/>
+			    <input type="button" id="rightall" value=">>" style="display: block;"/>
+		    </div>
+		    <div "style="display: inline-block !important; float:left !important">
+		    <select id="targetHeaderFields" name="targetHeaderFields" multiple="multiple" style="width:200Px;">
+		    </select>
+		    </div>
+		    <br />
+	    </div>
+	      -->
+	     
+    	<br>
+    	<div>
+    		<br>
+    	</div>
+		<div id="div_records">
+			<strong>Record Count: </strong>
+			<input id="records" type="text" name="records" value="1000" style="margin-left: 5px;" >
+			<br> <br> <br>
+			<strong>From Year: </strong>
+			<select id="fromYear" name="fromYear" style="margin-left: 30px;"></select>
+			<strong style="margin-left:20px">To Year: </strong>
+			<select id="toYear" name="toYear" style="margin-left: 5px;"></select>
+			<br></br>
+		</div>
+		<br></br>
+		<input type="submit" value="Generate Data" id="upload-button"  >
+	</form>
+</div>
+</body>
